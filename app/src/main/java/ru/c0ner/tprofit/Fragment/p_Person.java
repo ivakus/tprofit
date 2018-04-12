@@ -1,23 +1,32 @@
 package ru.c0ner.tprofit.Fragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +42,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
 
     public static final String TAG = "p_PersonTAG";
     public dataObject parent_Object;
+    public String API_Server_URL;
     public interface  PPersonCallBack {
         public void p_Person_onItemSelect (String fagmengTAG, int position, Person personObject );
 
@@ -44,7 +54,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         this.API_URL = API_URL;
     }
 
-    public ArrayList<Person> mItemList;
+    public ArrayList<Person> mItemList = new ArrayList<Person>();
 
     public void setParent_Object(dataObject parent_Object) {
         this.parent_Object = parent_Object;
@@ -64,6 +74,8 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         public class ViewHolderObject{
             TextView mName;
             TextView mPhone;
+            ImageView mIcon;
+
         }
 
         public Context context;
@@ -93,18 +105,25 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
             Person m = (Person) getItem(position);
             String str =  (m.getName()!=null)?m.getName().toString():"" ;
 
+
             ViewHolderObject holder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(context).inflate(R.layout.person_list_item, parent, false);
                 holder = new ViewHolderObject();
                 holder.mName = (TextView)convertView.findViewById(R.id.person_list_item_Name);
                 holder.mPhone = (TextView)convertView.findViewById(R.id.person_list_item_Phone);
+                holder.mIcon = (ImageView) convertView.findViewById(R.id.person_list_item_pic);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderObject) convertView.getTag();
             }
             holder.mName.setText(str);
             holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
+            if (m.getPhoto() !=null) {
+                new DownloadImageTask(holder.mIcon)
+                        .execute(API_Server_URL+m.getPhoto().toString());
+                        //.execute("http://api.aoprofit.com/img/photo/1.jpg");
+            }
             return convertView;
         }
     }
@@ -189,13 +208,14 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
 
         View v = inflater.inflate(R.layout.p_person_layout ,container,false);
 
-        mItemList = new ArrayList<Person>();
+
         mListView = v.findViewById(R.id.person_fragment_listview);
         mAdapter = new Person_Adapter(getContext());
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
         TextView tw = v.findViewById(R.id.person_fragment_title);
         tw.setText(Title);
+        API_Server_URL = getString(R.string.str_server_api_name);
        // getPerson();
         return v;
     }
@@ -206,6 +226,9 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         s.execute(API_URL);
     }
 
+    public void setItemList(ArrayList<Person> itemList) {
+        mItemList = itemList;
+    }
 
     public void onItemClick(AdapterView parent, View v, int position, long id) {
         // Do something in response to the click
@@ -214,5 +237,173 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         // str = m.getTitle().toString();
        // mCallBack.p_Object_onItemSelect(TAG, position, m);
     }
+
+
+
+    /*
+    private void loadBitmap(Context context, String name, ImageView iv) {
+        //final Bitmap bm = getBitmapFromMemCache(name);
+        Bitmap bm;
+        if (null != bm) {
+          //  cancelDownload(name, iv);
+          //  iv.setImageBitmap(bm);
+        } else {
+            LoadImageTask lt = new LoadImageTask(context, iv, name);
+            DownloadDrawable dd = new DownloadDrawable(lt);
+            iv.setImageDrawable(dd);
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                lt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            else
+                lt.execute();
+        }
+    }
+
+ /
+    private class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
+        private final WeakReference<ImageView> _weakIv;
+        private final WeakReference<Context> _context;
+        private final String _name;
+
+        public LoadImageTask(Context context, ImageView iv, String name) {
+            super();
+            _weakIv = new WeakReference<>(iv);
+            _context = new WeakReference<>(context);
+            _name = name;
+        }
+
+        protected Bitmap decodeFile(File file) {
+            try {
+                InputStream is = new FileInputStream(file);
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(is, null, opt);
+                int sc = calculateInSampleSize(opt, _imageSize, _imageSize);
+                //is.reset();
+                opt.inSampleSize = sc;
+                opt.inJustDecodeBounds = false;
+                Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file), null, opt);
+                Log.d("LOAD_IMAGE", " name = " + _name + " w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
+                return bitmap;
+            } catch (IOException e) {
+                //Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
+            }
+            return null;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            try {
+                Context context = _context.get();
+                Bitmap bitmap;
+                File file;
+                if (context != null) {
+                    //InputStream is = context.getAssets().open(_name);
+                    file = new File(context.getCacheDir(), _name.replace("/", ""));
+                    bitmap = decodeFile(file);
+                    if (null == bitmap ) {
+                        URL url = new URL(_name);
+                        InputStream is = url.openConnection().getInputStream();
+                        OutputStream os = new FileOutputStream(file);
+                        Utils.CopyStream(is, os);
+                        os.close();
+                        bitmap = decodeFile(file);
+                    }
+                    return bitmap;
+                }
+            } catch (IOException e) {
+                Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
+            }
+            return null;
+        }
+
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (isCancelled())
+                bitmap = null;
+
+            Bitmap bm = ListFragment.this.getBitmapFromMemCache(_name);
+            if (bm == null && bitmap != null) {
+                ListFragment.this.addBitmapToMemoryCache(_name, bitmap);
+                bm = bitmap;
+            }
+            ImageView iv = _weakIv.get();
+            if (iv != null && this == getBitmapDownloaderTask(iv)) {
+
+                iv.setImageBitmap(bm);
+                // Now change ImageView's dimensions to match the scaled image
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) iv.getLayoutParams();
+                params.width = _imageSize;
+                params.height = _imageSize;
+                //params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                //params.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                params.gravity = Gravity.CENTER_HORIZONTAL;
+                iv.setLayoutParams(params);
+
+            }
+        }
+    }
+
+
+
+    private static class DownloadDrawable extends ColorDrawable {
+        private final WeakReference<LoadImageTask> _loadTaskWeak;
+
+        private DownloadDrawable(LoadImageTask loadTask) {
+            super(Color.WHITE);
+            _loadTaskWeak = new WeakReference<>(loadTask);
+        }
+
+        public LoadImageTask getTask() {
+            return _loadTaskWeak.get();
+        }
+    }
+
+
+
+
+  */
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+
+            final OkHttpClient client = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url(urls[0])
+                    .build();
+
+            Response response = null;
+            Bitmap mIcon11 = null;
+            try {
+                response = client.newCall(request).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (response.isSuccessful()) {
+                try {
+                    mIcon11 = BitmapFactory.decodeStream(response.body().byteStream());
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
+
+
 
 }
