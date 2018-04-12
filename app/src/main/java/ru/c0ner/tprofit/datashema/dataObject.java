@@ -42,7 +42,7 @@ public class dataObject {
     }
 
     public String getManagerName() {
-        return managerName;
+        return managerName!=null?managerName:"";
     }
 
     public void setManagerName(String managerName) {
@@ -50,7 +50,7 @@ public class dataObject {
     }
 
     public String getName() {
-        return name;
+        return name!=null?name:"";
     }
 
     public void setName(String name) {
@@ -58,7 +58,7 @@ public class dataObject {
     }
 
     public String getObjectStatus() {
-        return objectStatus;
+        return objectStatus!=null?objectStatus:"";
     }
 
     public void setObjectStatus(String objectStatus) {
@@ -66,7 +66,7 @@ public class dataObject {
     }
 
     public String getSlefUrl() {
-        return slefUrl;
+        return slefUrl!=null?slefUrl:"";
     }
 
     public void setSlefUrl(String slefUrl) {

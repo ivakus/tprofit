@@ -102,9 +102,9 @@ public class t_profit extends AppCompatActivity
             requestPermissions(new String[]{Manifest.permission.CAMERA},PERRMITION_RESULT);
         }
 
-       FragmentTransaction ft =  fm.beginTransaction();
-       ft.add(R.id.main_frame,mMainFragment);
-       ft.commit();
+    //   FragmentTransaction ft =  fm.beginTransaction();
+    //   ft.add(R.id.main_frame,mMainFragment);
+    //   ft.commit();
     }
 
     public void Init (){

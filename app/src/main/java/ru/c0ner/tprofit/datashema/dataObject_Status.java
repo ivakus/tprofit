@@ -39,7 +39,7 @@ public class dataObject_Status {
     }
 
     public String getManagerName() {
-        return managerName;
+        return managerName!=null?managerName:"";
     }
 
     public void setManagerName(String managerName) {
@@ -55,7 +55,7 @@ public class dataObject_Status {
     }
 
     public String getName() {
-        return name;
+        return name!=null? name:"";
     }
 
     public void setName(String name) {

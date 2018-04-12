@@ -82,7 +82,7 @@ public class p_MainFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             dataObject_Status m = (dataObject_Status) getItem(position);
-            String str = m.getName().toString();
+            String str = (m.getName() != null)?m.getName().toString():"";
 
             ViewHolderObject holder;
             if (convertView == null) {

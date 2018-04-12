@@ -70,7 +70,7 @@ public class p_Object extends Fragment implements AdapterView.OnItemClickListene
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             dataObject m = (dataObject) getItem(position);
-            String str = (String) m.getName().toString();
+            String str =  (m.getName()!=null)?m.getName().toString():"" ;
 
             ViewHolderObject holder;
             if (convertView == null) {
@@ -83,7 +83,13 @@ public class p_Object extends Fragment implements AdapterView.OnItemClickListene
                 holder = (ViewHolderObject) convertView.getTag();
             }
             holder.mName.setText(str);
-            holder.mProrab_name.setText(m.getManagerName().toString());
+            String m_name = m.getManagerName();
+            if ( m_name != null ){
+                holder.mProrab_name.setText(m.getManagerName().toString());
+            }
+            else {
+                holder.mProrab_name.setText("");
+            }
             return convertView;
         }
     }

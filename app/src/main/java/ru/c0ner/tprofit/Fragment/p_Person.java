@@ -91,7 +91,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             Person m = (Person) getItem(position);
-            String str = (String) m.getName().toString();
+            String str =  (m.getName()!=null)?m.getName().toString():"" ;
 
             ViewHolderObject holder;
             if (convertView == null) {
@@ -104,7 +104,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
                 holder = (ViewHolderObject) convertView.getTag();
             }
             holder.mName.setText(str);
-            holder.mPhone.setText(m.getPhone().toString());
+            holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
             return convertView;
         }
     }
