@@ -21,11 +21,10 @@ import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -36,12 +35,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -49,7 +47,7 @@ import ru.c0ner.tprofit.R;
 import ru.c0ner.tprofit.datashema.Person;
 import ru.c0ner.tprofit.datashema.dataObject;
 
-public class p_Person extends Fragment implements AdapterView.OnItemClickListener{
+public class p_Person extends Fragment  {
 
     public static final String TAG = "p_PersonTAG";
     protected Context _context;
@@ -131,21 +129,41 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         //return null;
 
     }
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView mName;
-        TextView mPhone;
-        ImageView mIcon;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            mName = (TextView)itemView.findViewById(R.id.person_list_item_Name);
-            mPhone = (TextView)itemView.findViewById(R.id.person_list_item_Phone);
-            mIcon = (ImageView) itemView.findViewById(R.id.person_list_item_pic);
+
+    public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHolder> {
+/*
+        public interface t_OnItemClickListener {
+            public void onItemClick(View v, int position);
+        }
+
+        public void SetOnItemClickListener( t_OnItemClickListener mItemClickListener) {
+            this.mItemClickListener = mItemClickListener;
+        }
+        t_OnItemClickListener mItemClickListener;
+*/
+        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            TextView mName;
+            TextView mPhone;
+            ImageView mIcon;
+            public ViewHolder(View itemView) {
+                super(itemView);
+                mName = (TextView)itemView.findViewById(R.id.person_list_item_Name);
+                mPhone = (TextView)itemView.findViewById(R.id.person_list_item_Phone);
+                mIcon = (ImageView) itemView.findViewById(R.id.person_list_item_pic);
+                itemView.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                int position = getAdapterPosition();
+                Person m = (Person) mItemList.get(position);
+                Toast.makeText(getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
+
+
+            }
 
         }
 
-
-    }
-    public class Person_Adapter extends RecyclerView.Adapter<ViewHolder>{
 
         @NonNull
         @Override
@@ -175,6 +193,9 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         public int getItemCount() {
             return mItemList.size();
         }
+
+
+
     }
 
     private String getUsingOkHttp(String url) {
@@ -225,15 +246,15 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         View v = inflater.inflate(R.layout.p_person_layout ,container,false);
 
 
-        // mListView = v.findViewById(R.id.person_fragment_listview);
+
         mRecyclerView = v.findViewById(R.id.person_fragment_listview);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new Person_Adapter();//new Person_Adapter(getContext());
+        mAdapter = new Person_Adapter();
+       // mAdapter.SetOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
-        //mListView.setAdapter(mAdapter);
-        //mListView.setOnItemClickListener(this);
+        mRecyclerView.setItemAnimator(new SlideInUpAnimator());
         TextView tw = v.findViewById(R.id.person_fragment_title);
         tw.setText(Title);
         API_Server_URL = getString(R.string.str_server_api_name);
@@ -251,7 +272,11 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         mItemList = itemList;
     }
 
-    public void onItemClick(AdapterView parent, View v, int position, long id) {
+    public void onItemClick(View v, int position) {
+
+        Person m = (Person) mItemList.get(position);
+        Toast.makeText(getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
+
         // Do something in response to the click
        // dataObject m = (dataObject) parent.getAdapter().getItem(position);
         // Toast.makeText(this.getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
@@ -376,5 +401,6 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
     public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         _memoryCache.put(key, bitmap);
     }
+
 
 }
