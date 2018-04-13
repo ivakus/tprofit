@@ -11,6 +11,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +66,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
     }
 
     public ListView mListView;
+    public RecyclerView mRecyclerView;
     public Person_Adapter mAdapter;
 
     public void setTitle(String title) {
@@ -69,7 +74,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
     }
 
     public String Title = "";
-    public class Person_Adapter extends BaseAdapter {
+    public class Person_Adapter_ extends BaseAdapter {
 
         public class ViewHolderObject{
             TextView mName;
@@ -81,7 +86,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         public Context context;
         //   ViewHolderObject vHolder;
 
-        public Person_Adapter(Context context) {
+        public Person_Adapter_(Context context) {
             this.context = context;
         }
 
@@ -119,9 +124,9 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
             }
             holder.mName.setText(str);
             holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
-            if (m.getPhoto() !=null) {
+            if (m.getSmallPhoto() !=null) {
                 new DownloadImageTask(holder.mIcon)
-                        .execute(API_Server_URL+m.getPhoto().toString());
+                        .execute(m.getSmallPhoto().toString());
                         //.execute("http://api.aoprofit.com/img/photo/1.jpg");
             }
             return convertView;
@@ -153,6 +158,50 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         }
         //return null;
 
+    }
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView mName;
+        TextView mPhone;
+        ImageView mIcon;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            mName = (TextView)itemView.findViewById(R.id.person_list_item_Name);
+            mPhone = (TextView)itemView.findViewById(R.id.person_list_item_Phone);
+            mIcon = (ImageView) itemView.findViewById(R.id.person_list_item_pic);
+
+        }
+
+
+    }
+    public class Person_Adapter extends RecyclerView.Adapter<ViewHolder>{
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            final LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE);
+            View convertView = inflater.inflate(R.layout.person_list_item, parent, false);
+            // View convertView = inflater.inflate(R.layout., parent, false);
+            ViewHolder holder = new ViewHolder(convertView);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Person m = (Person) mItemList.get(position);
+            String str =  (m.getName()!=null)?m.getName().toString():"" ;
+            holder.mName.setText(str);
+            holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
+            if (m.getSmallPhoto() !=null) {
+                new DownloadImageTask(holder.mIcon)
+                        .execute(m.getSmallPhoto().toString());
+                //.execute("http://api.aoprofit.com/img/photo/1.jpg");
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mItemList.size();
+        }
     }
 
     private String getUsingOkHttp(String url) {
@@ -209,10 +258,15 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         View v = inflater.inflate(R.layout.p_person_layout ,container,false);
 
 
-        mListView = v.findViewById(R.id.person_fragment_listview);
-        mAdapter = new Person_Adapter(getContext());
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
+        // mListView = v.findViewById(R.id.person_fragment_listview);
+        mRecyclerView = v.findViewById(R.id.person_fragment_listview);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new Person_Adapter();//new Person_Adapter(getContext());
+        mRecyclerView.setAdapter(mAdapter);
+        //mListView.setAdapter(mAdapter);
+        //mListView.setOnItemClickListener(this);
         TextView tw = v.findViewById(R.id.person_fragment_title);
         tw.setText(Title);
         API_Server_URL = getString(R.string.str_server_api_name);
@@ -238,136 +292,9 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
        // mCallBack.p_Object_onItemSelect(TAG, position, m);
     }
 
-
-
-    /*
-    private void loadBitmap(Context context, String name, ImageView iv) {
-        //final Bitmap bm = getBitmapFromMemCache(name);
-        Bitmap bm;
-        if (null != bm) {
-          //  cancelDownload(name, iv);
-          //  iv.setImageBitmap(bm);
-        } else {
-            LoadImageTask lt = new LoadImageTask(context, iv, name);
-            DownloadDrawable dd = new DownloadDrawable(lt);
-            iv.setImageDrawable(dd);
-
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-                lt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            else
-                lt.execute();
-        }
-    }
-
- /
-    private class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
-        private final WeakReference<ImageView> _weakIv;
-        private final WeakReference<Context> _context;
-        private final String _name;
-
-        public LoadImageTask(Context context, ImageView iv, String name) {
-            super();
-            _weakIv = new WeakReference<>(iv);
-            _context = new WeakReference<>(context);
-            _name = name;
-        }
-
-        protected Bitmap decodeFile(File file) {
-            try {
-                InputStream is = new FileInputStream(file);
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inJustDecodeBounds = true;
-                BitmapFactory.decodeStream(is, null, opt);
-                int sc = calculateInSampleSize(opt, _imageSize, _imageSize);
-                //is.reset();
-                opt.inSampleSize = sc;
-                opt.inJustDecodeBounds = false;
-                Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file), null, opt);
-                Log.d("LOAD_IMAGE", " name = " + _name + " w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
-                return bitmap;
-            } catch (IOException e) {
-                //Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
-            }
-            return null;
-        }
-
-        @Override
-        protected Bitmap doInBackground(Void... params) {
-            try {
-                Context context = _context.get();
-                Bitmap bitmap;
-                File file;
-                if (context != null) {
-                    //InputStream is = context.getAssets().open(_name);
-                    file = new File(context.getCacheDir(), _name.replace("/", ""));
-                    bitmap = decodeFile(file);
-                    if (null == bitmap ) {
-                        URL url = new URL(_name);
-                        InputStream is = url.openConnection().getInputStream();
-                        OutputStream os = new FileOutputStream(file);
-                        Utils.CopyStream(is, os);
-                        os.close();
-                        bitmap = decodeFile(file);
-                    }
-                    return bitmap;
-                }
-            } catch (IOException e) {
-                Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
-            }
-            return null;
-        }
-
-        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            if (isCancelled())
-                bitmap = null;
-
-            Bitmap bm = ListFragment.this.getBitmapFromMemCache(_name);
-            if (bm == null && bitmap != null) {
-                ListFragment.this.addBitmapToMemoryCache(_name, bitmap);
-                bm = bitmap;
-            }
-            ImageView iv = _weakIv.get();
-            if (iv != null && this == getBitmapDownloaderTask(iv)) {
-
-                iv.setImageBitmap(bm);
-                // Now change ImageView's dimensions to match the scaled image
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) iv.getLayoutParams();
-                params.width = _imageSize;
-                params.height = _imageSize;
-                //params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                //params.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                params.gravity = Gravity.CENTER_HORIZONTAL;
-                iv.setLayoutParams(params);
-
-            }
-        }
-    }
-
-
-
-    private static class DownloadDrawable extends ColorDrawable {
-        private final WeakReference<LoadImageTask> _loadTaskWeak;
-
-        private DownloadDrawable(LoadImageTask loadTask) {
-            super(Color.WHITE);
-            _loadTaskWeak = new WeakReference<>(loadTask);
-        }
-
-        public LoadImageTask getTask() {
-            return _loadTaskWeak.get();
-        }
-    }
-
-
-
-
-  */
-
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
-
+        //private final WeakReference<ImageView> bmImage;
         public DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
