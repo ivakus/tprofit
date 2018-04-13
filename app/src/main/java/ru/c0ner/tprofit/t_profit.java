@@ -15,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.LruCache;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -57,7 +58,7 @@ public class t_profit extends AppCompatActivity
     public FragmentManager fm;
     public p_Person mPersonFragment;
     public p_MainFragment mMainFragment;
-
+    public LruCache<String, Bitmap> _memoryCache;
 
     public void p_Object_onItemSelect (String fagmengTAG, int position, dataObject mdataObject )
     {
@@ -120,14 +121,28 @@ public class t_profit extends AppCompatActivity
         mObjectFragment = new p_Object();
         mPersonFragment = new p_Person();
         mMainFragment = new p_MainFragment();
-       // fm = getSupportFragmentManager();
 
+        // иницилизируем кешь хранилище
+        if (_memoryCache == null) {
+            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+            final int cacheSize = maxMemory / 8;
+            _memoryCache = new LruCache<String, Bitmap>(cacheSize) {
+                @Override
+                protected int sizeOf(String key, Bitmap bitmap) {
+                    return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
+                }
+            };
+        };
+        mPersonFragment.set_memoryCache(_memoryCache);
+
+       // fm = getSupportFragmentManager();
+/*
         Resources resources = getResources();
         String clientId = ""; //resources.getString(R.string.client_id);
         String secret = ""; //resources.getString(R.string.client_secret);
         Intent intent =WebViewActivity.createAuthActivityIntent(getApplicationContext(), clientId, secret);
         startActivityForResult(intent, REQUEST_CODE);
-
+*/
 
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA},PERRMITION_RESULT);
@@ -243,6 +258,21 @@ public class t_profit extends AppCompatActivity
                 // Какие-то действия с полноценным изображением,
                 // сохраненным по адресу mOutputFileUri
                 mImageView.setImageURI(mOutputFileUri);
+            }
+        }
+
+        if ( requestCode==REQUEST_CODE ) {
+            if (resultCode == AppCompatActivity.RESULT_OK) {
+                String token = data.getStringExtra(WebViewActivity.ACCESS_TOKEN);
+                Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
+                //AUTH_Token = token;
+            }
+            if (resultCode == AppCompatActivity.RESULT_CANCELED) {
+                if (data != null && data.hasExtra(WebViewActivity.AUTH_ERROR)) {
+                    String error = data.getStringExtra(WebViewActivity.AUTH_ERROR);
+                    Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                }
+
             }
         }
 

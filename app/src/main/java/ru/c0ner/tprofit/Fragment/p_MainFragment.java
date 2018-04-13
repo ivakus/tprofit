@@ -1,5 +1,6 @@
 package ru.c0ner.tprofit.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,9 +35,14 @@ import com.google.gson.GsonBuilder;
 import org.w3c.dom.Text;
 
 
-public class p_MainFragment extends Fragment {
+public class p_MainFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     public static final String TAG = "p_mainfragmentTAG";
+
+    public interface  PMainFragmentCallBack {
+        public void p_MainFragment_onItemSelect (String fagmengTAG, int position, dataObject_Status mdataObject_status );
+    }
+    public PMainFragmentCallBack mCallBack;
 
     public ArrayList<dataObject_Status> mItemList;
     public ListView mListView;
@@ -107,6 +113,22 @@ public class p_MainFragment extends Fragment {
         }
     }
     public class ServerAPI extends AsyncTask<String,Void,String> {
+        Context _context;
+        ProgressDialog dialog;
+
+        public ServerAPI(Context _context) {
+            this._context = _context;
+        }
+
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(_context);
+            dialog.setMessage("Загрузка");
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(true);
+            dialog.show();
+
+        }
         @Override
         protected String doInBackground(String... strings) {
 
@@ -115,6 +137,7 @@ public class p_MainFragment extends Fragment {
 
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
+            dialog.dismiss();
             if (res != null) {
                 //mItemList = new ArrayList<>(res);
                 //switchButtonState();
@@ -171,7 +194,7 @@ public class p_MainFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-           // mCallBack = (PPersonCallBack) getActivity();
+            mCallBack = (PMainFragmentCallBack) getActivity();
         }
         catch (ClassCastException e) {
             e.getMessage() ;
@@ -189,13 +212,13 @@ public class p_MainFragment extends Fragment {
         mListView = v.findViewById(R.id.p_main_fragment_listview);
         mAdapter = new Main_Adapter(getContext());
         mListView.setAdapter(mAdapter);
-        //mListView.setOnItemClickListener(this);
+        mListView.setOnItemClickListener(this);
         getPerson();
         return v;
     }
 
     private void getPerson() {
-        ServerAPI s = new ServerAPI();
+        ServerAPI s = new ServerAPI(getContext());
         String url = getString(R.string.str_server_api_name)+"/api/object_status";
         s.execute(url);
     }
@@ -206,7 +229,8 @@ public class p_MainFragment extends Fragment {
         // dataObject m = (dataObject) parent.getAdapter().getItem(position);
         // Toast.makeText(this.getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
         // str = m.getTitle().toString();
-        // mCallBack.p_Object_onItemSelect(TAG, position, m);
+        dataObject_Status m =  mItemList.get(position);
+        mCallBack.p_MainFragment_onItemSelect(TAG, position, m);
     }
 
 

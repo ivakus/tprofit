@@ -1,5 +1,6 @@
 package ru.c0ner.tprofit.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +17,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +31,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -45,8 +52,20 @@ import ru.c0ner.tprofit.datashema.dataObject;
 public class p_Person extends Fragment implements AdapterView.OnItemClickListener{
 
     public static final String TAG = "p_PersonTAG";
+    protected Context _context;
+
+    public void set_context(Context _context) {
+        this._context = _context;
+    }
+
     public dataObject parent_Object;
     public String API_Server_URL;
+    public android.support.v4.util.LruCache<String, Bitmap> _memoryCache;
+
+    public void set_memoryCache(android.support.v4.util.LruCache<String, Bitmap> _memoryCache) {
+        this._memoryCache = _memoryCache;
+    }
+
     public interface  PPersonCallBack {
         public void p_Person_onItemSelect (String fagmengTAG, int position, Person personObject );
 
@@ -74,66 +93,18 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
     }
 
     public String Title = "";
-    public class Person_Adapter_ extends BaseAdapter {
-
-        public class ViewHolderObject{
-            TextView mName;
-            TextView mPhone;
-            ImageView mIcon;
-
-        }
-
-        public Context context;
-        //   ViewHolderObject vHolder;
-
-        public Person_Adapter_(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        public int getCount() {
-            return mItemList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mItemList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Person m = (Person) getItem(position);
-            String str =  (m.getName()!=null)?m.getName().toString():"" ;
-
-
-            ViewHolderObject holder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.person_list_item, parent, false);
-                holder = new ViewHolderObject();
-                holder.mName = (TextView)convertView.findViewById(R.id.person_list_item_Name);
-                holder.mPhone = (TextView)convertView.findViewById(R.id.person_list_item_Phone);
-                holder.mIcon = (ImageView) convertView.findViewById(R.id.person_list_item_pic);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolderObject) convertView.getTag();
-            }
-            holder.mName.setText(str);
-            holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
-            if (m.getSmallPhoto() !=null) {
-                new DownloadImageTask(holder.mIcon)
-                        .execute(m.getSmallPhoto().toString());
-                        //.execute("http://api.aoprofit.com/img/photo/1.jpg");
-            }
-            return convertView;
-        }
-    }
     public class ServerAPI extends AsyncTask<String,Void,String> {
+        ProgressDialog dialog;
+        Context _context;
+
+
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+
+        }
+
         protected String doInBackground(String... strings) {
 
             return getUsingOkHttp(strings[0]);
@@ -155,6 +126,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
             else {
                 //textView.setText(R.string.error_gettings_followers);
             }
+
         }
         //return null;
 
@@ -192,9 +164,10 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
             holder.mName.setText(str);
             holder.mPhone.setText( (m.getPhone()!=null)?m.getPhone().toString():"");
             if (m.getSmallPhoto() !=null) {
-                new DownloadImageTask(holder.mIcon)
-                        .execute(m.getSmallPhoto().toString());
+               // new DownloadImageTask(holder.mIcon)
+                 //       .execute(m.getSmallPhoto().toString());
                 //.execute("http://api.aoprofit.com/img/photo/1.jpg");
+                p_Person.this.loadBitmap(getContext(),m.getSmallPhoto().toString(),holder.mIcon);
             }
         }
 
@@ -213,13 +186,6 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
 
             Response response = createClient().newCall(request).execute();
             if (response.isSuccessful()) {
-
-                // Gson gson = new GsonBuilder().create();
-                //  dataObject[] ret  = gson.fromJson(response.body().string(), dataObject[].class);
-
-                // ArrayList m = new ArrayList<dataObject>(Arrays.asList( gson.fromJson(response.body().string(), dataObject[].class)));
-                //m.addAll(ret);
-                // mItemList = m;
                 return response.body().string();
             }
         } catch (IOException e) {
@@ -227,6 +193,8 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         }
         return null;
     }
+
+
 
     private OkHttpClient createClient() {
         return new OkHttpClient.Builder()
@@ -250,7 +218,6 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
 
 
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -270,7 +237,7 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
         TextView tw = v.findViewById(R.id.person_fragment_title);
         tw.setText(Title);
         API_Server_URL = getString(R.string.str_server_api_name);
-       // getPerson();
+        // getPerson();
         return v;
     }
 
@@ -294,43 +261,120 @@ public class p_Person extends Fragment implements AdapterView.OnItemClickListene
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
+        Context _context;
+        String _name;
         //private final WeakReference<ImageView> bmImage;
-        public DownloadImageTask(ImageView bmImage) {
+        public DownloadImageTask(Context _context, ImageView bmImage) {
             this.bmImage = bmImage;
+            this._context = _context;
         }
+
+        protected Bitmap decodeFile(File file) {
+            try {
+                InputStream is = new FileInputStream(file);
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(is, null, opt);
+                opt.inJustDecodeBounds = false;
+                Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file),null,opt);
+                //Log.d("LOAD_IMAGE", " name = " + _name + " w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
+                return bitmap;
+            } catch (IOException e) {
+                //Log.e("LoadImageTask", "LoadImageTask.LoadBitmap IOException " + e.getMessage(), e);
+            }
+            return null;
+        }
+
+        public void CopyStream(InputStream is, OutputStream os)
+        {
+            final int buffer_size=1024;
+            try
+            {
+                byte[] bytes=new byte[buffer_size];
+                for(;;)
+                {
+                    int count=is.read(bytes, 0, buffer_size);
+                    if(count==-1)
+                        break;
+                    os.write(bytes, 0, count);
+                }
+            }
+            catch(Exception ex){}
+        }
+
 
         protected Bitmap doInBackground(String... urls) {
 
-            final OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url(urls[0])
-                    .build();
-
-            Response response = null;
-            Bitmap mIcon11 = null;
-            try {
-                response = client.newCall(request).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (response.isSuccessful()) {
-                try {
-                    mIcon11 = BitmapFactory.decodeStream(response.body().byteStream());
-                } catch (Exception e) {
-                    Log.e("Error", e.getMessage());
-                    e.printStackTrace();
+             _name = urls[0].toString();
+                Context context = _context;
+                Bitmap bitmap;
+                File file;
+                if (context != null) {
+                    //InputStream is = context.getAssets().open(_name);
+                    file = new File(context.getCacheDir(), _name.replace("/", ""));
+                    bitmap = decodeFile(file);
+                    if (null == bitmap ) {
+                        Log.d ("LOAD_FROM Net",_name);
+                        final OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder().url(urls[0]).build();
+                        Response response = null;
+                        try {
+                            response = client.newCall(request).execute();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (response.isSuccessful()) {
+                            try {
+                               // bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                                OutputStream os = new FileOutputStream(file);
+                                CopyStream(response.body().byteStream(),os);
+                                os.close();
+                                bitmap = decodeFile(file);
+                            } catch (Exception e) {
+                                Log.e("Error", e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }
+                        }
+                     else {
+                        {Log.d ("LOAD_FROM File System",_name);}
+                    }
+                    return bitmap;
                 }
-
-            }
-            return mIcon11;
+        return null;
         }
 
         protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
+            Bitmap bm = p_Person.this.getBitmapFromMemCache(_name);
+            if (bm == null && result != null) {
+                p_Person.this.addBitmapToMemoryCache(_name, result);
+                bm = result;
+            }
+
+            bmImage.setImageBitmap(bm);
         }
     }
 
+    private void loadBitmap(Context context, String name, ImageView iv) {
+        final Bitmap bm = getBitmapFromMemCache(name);
+        if (null != bm) {
+           // cancelDownload(name, iv);
+            Log.d ("LOAD_FROM CAche",name);
+            iv.setImageBitmap(bm);
+        } else {
 
+            new DownloadImageTask(context,iv)
+                    .execute(name);
+
+        }
+    }
+
+    public Bitmap getBitmapFromMemCache(String key) {
+        return _memoryCache.get(key);
+    }
+
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        _memoryCache.put(key, bitmap);
+    }
 
 }

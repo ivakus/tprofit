@@ -1,5 +1,6 @@
 package ru.c0ner.tprofit.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -94,14 +95,33 @@ public class p_Object extends Fragment implements AdapterView.OnItemClickListene
         }
     }
     public class ServerAPI extends AsyncTask<String,Void,String>{
+        Context _context;
+        public ProgressDialog dialog;
+
+        public ServerAPI(Context _context) {
+            this._context = _context;
+        }
+
         @Override
         protected String doInBackground(String... strings) {
 
             return getUsingOkHttp(strings[0]);
         }
 
-            protected void onPostExecute(String res) {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(_context);
+            dialog.setMessage("Загрузка");
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(true);
+            dialog.show();
+
+        }
+
+        protected void onPostExecute(String res) {
                 super.onPostExecute(res);
+                dialog.dismiss();
                 if (res != null) {
                     //mItemList = new ArrayList<>(res);
                     //switchButtonState();
@@ -191,7 +211,7 @@ public class p_Object extends Fragment implements AdapterView.OnItemClickListene
             m.setManagerName("Ivanov : "+i);
             mItemList.add(m);
         }*/
-      ServerAPI serverAPI = new ServerAPI();
+      ServerAPI serverAPI = new ServerAPI(getContext());
       serverAPI.execute(getString(R.string.str_object_api_url));
      //   Gson gson = new GsonBuilder().create();
      //   mItemList = new ArrayList<dataObject>(Arrays.asList( gson.fromJson(serverAPI.get(), dataObject[].class)));

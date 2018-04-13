@@ -8,4 +8,12 @@
     <string name="action_settings">Settings</string>
     <string name="str_object_api_url">http://api.aoprofit.com/api/object/</string>
     <string name="str_server_api_name">http://api.aoprofit.com</string>
+
+
+    <string name="callback_url">http://example.com</string>
+
+    <string name="auth_url">https://t.aoprofit.com</string>
+    <string name="token_url">https://t.aoprofit.com</string>
+    <string name="login_soc_url">https://t.aoprofit.com/main</string>
+
 </resources>
