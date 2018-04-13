@@ -223,7 +223,17 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
     }
 
 
+    public void onItemLongClick(View v, int position) {
 
+        //Person m = (Person) mItemList.get(position);
+        Toast.makeText(getContext(), "Долгое Нажатие на позиции  "+position, Toast.LENGTH_SHORT).show();
+
+        // Do something in response to the click
+        // dataObject m = (dataObject) parent.getAdapter().getItem(position);
+        // Toast.makeText(this.getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
+        // str = m.getTitle().toString();
+        // mCallBack.p_Object_onItemSelect(TAG, position, m);
+    }
 
 
 }

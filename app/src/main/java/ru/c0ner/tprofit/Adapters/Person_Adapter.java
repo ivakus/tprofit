@@ -49,6 +49,7 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
 
     public interface t_OnItemClickListener {
         public void onItemClick(View v, int position);
+        public void onItemLongClick (View v,int position);
     }
 
     public void SetOnItemClickListener( t_OnItemClickListener mItemClickListener) {
@@ -56,7 +57,7 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
     }
     t_OnItemClickListener mItemClickListener;
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener {
         TextView mName;
         TextView mPhone;
         ImageView mIcon;
@@ -66,6 +67,7 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
             mPhone = (TextView)itemView.findViewById(R.id.person_list_item_Phone);
             mIcon = (ImageView) itemView.findViewById(R.id.person_list_item_pic);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         @Override
@@ -77,6 +79,17 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
                 mItemClickListener.onItemClick(v,position);
             }
 
+        }
+
+        public boolean onLongClick(View v)
+        {
+            int position = getAdapterPosition();
+            if (null != mItemClickListener) {
+                // Person m = (Person) mItemList.get(position);
+                // Toast.makeText(_context, m.getName().toString(), Toast.LENGTH_SHORT).show();
+                mItemClickListener.onItemLongClick(v,position);
+            }
+            return true;
         }
 
     }
