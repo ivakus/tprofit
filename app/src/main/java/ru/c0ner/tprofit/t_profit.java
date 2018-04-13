@@ -3,6 +3,7 @@ package ru.c0ner.tprofit;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -36,14 +37,17 @@ import ru.c0ner.tprofit.Fragment.p_Person;
 import ru.c0ner.tprofit.Fragment.webFragment;
 import ru.c0ner.tprofit.datashema.Person;
 import ru.c0ner.tprofit.datashema.dataObject;
+import ru.c0ner.tprofit.datashema.dataObject_Status;
 
 public class t_profit extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack {
 
+    private static final int REQUEST_CODE = 100;
     FloatingActionButton mFab;
     private final int CAMERA_RESULT = 1;
     private final int PERRMITION_RESULT = 2;
     private ImageView mImageView;
+    public String AUTH_Token = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
 
     final int CAMERA_ID = 0;
     final boolean FULL_SCREEN = true;
@@ -66,10 +70,30 @@ public class t_profit extends AppCompatActivity
         ft.replace(R.id.main_frame,mPersonFragment);
         ft.addToBackStack(p_Person.TAG);
         ft.commit();
+
     }
 
     public void p_Person_onItemSelect (String fagmengTAG, int position, Person personObject ) {
 
+    }
+    public void p_MainFragment_onItemSelect (String fagmengTAG, int position, dataObject_Status mdataObject_status ){
+        if (mdataObject_status.getPerson().size() > 0) {
+            Toast.makeText(this, mdataObject_status.getName().toString(), Toast.LENGTH_SHORT).show();
+            FragmentTransaction ft = fm.beginTransaction();
+            mPersonFragment.setTitle(mdataObject_status.getName().toString());
+            //mPersonFragment.setParent_Object(mdataObject);
+            //mPersonFragment.setAPI_URL(getString(R.string.str_server_api_name)+"/api/object/id/"+mdataObject.getId()+"/person");
+            //mPersonFragment.getPerson();
+            mPersonFragment.setItemList(mdataObject_status.getPerson());
+            // mPersonFragment.mAdapter.notifyDataSetChanged();
+            ft.replace(R.id.main_frame, mPersonFragment);
+            ft.addToBackStack(p_Person.TAG);
+            ft.commit();
+        }
+        else {
+
+            Toast.makeText(this, "На объекте : "+mdataObject_status.getName().toString()+ ", сегодня нет персонала ", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -98,13 +122,20 @@ public class t_profit extends AppCompatActivity
         mMainFragment = new p_MainFragment();
        // fm = getSupportFragmentManager();
 
+        Resources resources = getResources();
+        String clientId = ""; //resources.getString(R.string.client_id);
+        String secret = ""; //resources.getString(R.string.client_secret);
+        Intent intent =WebViewActivity.createAuthActivityIntent(getApplicationContext(), clientId, secret);
+        startActivityForResult(intent, REQUEST_CODE);
+
+
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA},PERRMITION_RESULT);
         }
 
-    //   FragmentTransaction ft =  fm.beginTransaction();
-    //   ft.add(R.id.main_frame,mMainFragment);
-    //   ft.commit();
+       FragmentTransaction ft =  fm.beginTransaction();
+       ft.add(R.id.main_frame,mMainFragment);
+       ft.commit();
     }
 
     public void Init (){
