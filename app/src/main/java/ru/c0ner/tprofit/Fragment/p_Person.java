@@ -231,31 +231,38 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
         // Звонок по телефону
 
 
-        if (m != null) {
-            switch (menuitem) {
-                case R.id.menu_item_Call: {
-                    String tel = "tel:" + m.getPhone().toString();
-                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(tel));
-                    startActivity(intent);
-                    break;
-                }
-                case R.id.menu_item_SendText: {
+        if ( m != null ) {
+            String str = m.getPhone();
+            if (m.getPhone() !=null ) {
+                switch (menuitem) {
+                    case R.id.menu_item_Call: {
+                        String tel = "tel:" + m.getPhone().toString();
+                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(tel));
+                        startActivity(intent);
+                        break;
+                    }
+                    case R.id.menu_item_SendText: {
 
-                    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                    sharingIntent.setType("text/plain");
-                    //sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
-                    startActivity(Intent.createChooser(sharingIntent, "Отправить Сообщение "));
-                    break;
+                        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        //sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+                        startActivity(Intent.createChooser(sharingIntent, "Отправить Сообщение "));
+                        break;
+                    }
                 }
             }
 
+            else{
+
+                Toast.makeText(this.getContext(), "Ошибка ! не заполнено поле 'Телефон' ", Toast.LENGTH_SHORT).show();
+            }
 
 
             /*
 
              */
             // getMenuInflater().inflate(R.menu.t_profit, menu);
-            Toast.makeText(getContext(), m.getName().toString() + "  " + position, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), m.getName().toString() + "  " + position, Toast.LENGTH_SHORT).show();
 
             // Do something in response to the click
             // dataObject m = (dataObject) parent.getAdapter().getItem(position);

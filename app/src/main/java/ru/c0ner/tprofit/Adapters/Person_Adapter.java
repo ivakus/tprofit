@@ -112,15 +112,9 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
                 switch (item.getItemId()) {
 
                     case R.id.menu_item_Call:
-                        Toast.makeText(_context,
-                                "Вы выбрали PopupMenu 1",
-                                Toast.LENGTH_SHORT).show();
                         mItemClickListener.onItemLongClick(getAdapterPosition(),R.id.menu_item_Call);
                         return true;
                     case R.id.menu_item_SendText:
-                        Toast.makeText(_context,
-                                "Вы выбрали PopupMenu 2",
-                                Toast.LENGTH_SHORT).show();
                         mItemClickListener.onItemLongClick(getAdapterPosition(),R.id.menu_item_SendText);
                         //getAdapterPosition();
 

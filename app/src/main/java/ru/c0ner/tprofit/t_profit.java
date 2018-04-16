@@ -79,7 +79,7 @@ public class t_profit extends AppCompatActivity
     }
     public void p_MainFragment_onItemSelect (String fagmengTAG, int position, dataObject_Status mdataObject_status ){
         if (mdataObject_status.getPerson().size() > 0) {
-            Toast.makeText(this, mdataObject_status.getName().toString(), Toast.LENGTH_SHORT).show();
+          //  Toast.makeText(this, mdataObject_status.getName().toString(), Toast.LENGTH_SHORT).show();
             FragmentTransaction ft = fm.beginTransaction();
             mPersonFragment.setTitle(mdataObject_status.getName().toString());
             //mPersonFragment.setParent_Object(mdataObject);
