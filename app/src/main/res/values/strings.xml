@@ -15,5 +15,5 @@
     <string name="auth_url">https://t.aoprofit.com</string>
     <string name="token_url">https://t.aoprofit.com</string>
     <string name="login_soc_url">https://t.aoprofit.com/main</string>
-
+    <integer name="Login_SOC">1</integer>
 </resources>

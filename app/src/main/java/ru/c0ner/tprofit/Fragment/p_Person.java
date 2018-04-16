@@ -100,10 +100,17 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
         ProgressDialog dialog;
         Context _context;
 
-
+        public ServerAPI(Context _context) {
+            this._context = _context;
+        }
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+       //     dialog = new ProgressDialog(_context);
+       //     dialog.setMessage("Загрузка");
+       //     dialog.setIndeterminate(true);
+       //     dialog.setCancelable(true);
+       //     dialog.show();
 
 
         }
@@ -115,6 +122,7 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
 
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
+         //   dialog.dismiss();
             if (res != null) {
                 //mItemList = new ArrayList<>(res);
                 //switchButtonState();
@@ -203,7 +211,7 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
     }
 
     public void getPerson() {
-        ServerAPI s = new ServerAPI();
+        ServerAPI s = new ServerAPI(_context);
       //  String url = getString(R.string.str_server_api_name)+"/api/object/id/"+parent_Object.getId()+"/person";
         s.execute(API_URL);
     }

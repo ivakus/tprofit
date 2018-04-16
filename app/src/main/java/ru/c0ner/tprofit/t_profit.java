@@ -49,7 +49,7 @@ public class t_profit extends AppCompatActivity
     private final int PERRMITION_RESULT = 2;
     private ImageView mImageView;
     public String AUTH_Token = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
-
+    final String KEY_TOKEN = "KEY_ROKEN";
     final int CAMERA_ID = 0;
     final boolean FULL_SCREEN = true;
     private Uri mOutputFileUri;
@@ -100,6 +100,9 @@ public class t_profit extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+      //  AUTH_Token = getIntent().getStringExtra(WebViewActivity.ACCESS_TOKEN);
+      //  if (AUTH_Token.length() <=0) {finish();}
         setContentView(R.layout.activity_t_profit);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -121,7 +124,7 @@ public class t_profit extends AppCompatActivity
         mObjectFragment = new p_Object();
         mPersonFragment = new p_Person();
         mMainFragment = new p_MainFragment();
-
+        mPersonFragment.set_context(getApplicationContext());
         // иницилизируем кешь хранилище
         if (_memoryCache == null) {
             final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);

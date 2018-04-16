@@ -13,8 +13,7 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-
+import android.widget.Toast;
 
 
 import java.io.IOException;
@@ -58,10 +57,6 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.web_view_activity);
         webView = (WebView) findViewById(R.id.web_view);
-
-        username = getIntent().getStringExtra(EXTRA_USERNAME);
-        password = getIntent().getStringExtra(EXTRA_PASSWORD);
-
         authUrlTemplate = getString(R.string.auth_url);
         redirectUrl = getString(callback_url);
     }
@@ -86,17 +81,19 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
 
     @Override
     public void onComplete(String token) {
-        Intent intent = new Intent();
+        Intent intent = new Intent(this,t_profit.class);
         intent.putExtra(ACCESS_TOKEN, token);
         setResult(Activity.RESULT_OK, intent);
+        startActivity(intent);
         finish();
     }
 
     @Override
     public void onError(String error) {
-        Intent intent = new Intent();
-        intent.putExtra(AUTH_ERROR, error);
-        setResult(Activity.RESULT_CANCELED, intent);
+       // Intent intent = new Intent();
+       // intent.putExtra(AUTH_ERROR, error);
+       // setResult(Activity.RESULT_CANCELED, intent);
+        Toast.makeText(this, "Вы не авторизованы", Toast.LENGTH_SHORT).show();
         finish();
     }
 
