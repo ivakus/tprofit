@@ -5,11 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,7 +53,7 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
 
     public interface t_OnItemClickListener {
         public void onItemClick(View v, int position);
-        public void onItemLongClick (View v,int position);
+        public void onItemLongClick (int position,int menuitem);
     }
 
     public void SetOnItemClickListener( t_OnItemClickListener mItemClickListener) {
@@ -57,7 +61,9 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
     }
     t_OnItemClickListener mItemClickListener;
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener,PopupMenu.OnMenuItemClickListener {
+
+
         TextView mName;
         TextView mPhone;
         ImageView mIcon;
@@ -68,14 +74,14 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
             mIcon = (ImageView) itemView.findViewById(R.id.person_list_item_pic);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
+
         }
+
 
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
             if (null != mItemClickListener) {
-                // Person m = (Person) mItemList.get(position);
-                // Toast.makeText(_context, m.getName().toString(), Toast.LENGTH_SHORT).show();
                 mItemClickListener.onItemClick(v,position);
             }
 
@@ -84,13 +90,45 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
         public boolean onLongClick(View v)
         {
             int position = getAdapterPosition();
+            showPopupMenu(v);
+            /*
             if (null != mItemClickListener) {
-                // Person m = (Person) mItemList.get(position);
-                // Toast.makeText(_context, m.getName().toString(), Toast.LENGTH_SHORT).show();
                 mItemClickListener.onItemLongClick(v,position);
             }
-            return true;
+            */
+            return false;
         }
+
+
+        private void showPopupMenu(View v) {
+            PopupMenu popupMenu = new PopupMenu(_context, v);
+            popupMenu.inflate(R.menu.persona_fragment_menu);
+            popupMenu.setOnMenuItemClickListener(this);
+            popupMenu.show();
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+
+                    case R.id.menu_item_Call:
+                        Toast.makeText(_context,
+                                "Вы выбрали PopupMenu 1",
+                                Toast.LENGTH_SHORT).show();
+                        mItemClickListener.onItemLongClick(getAdapterPosition(),R.id.menu_item_Call);
+                        return true;
+                    case R.id.menu_item_SendText:
+                        Toast.makeText(_context,
+                                "Вы выбрали PopupMenu 2",
+                                Toast.LENGTH_SHORT).show();
+                        mItemClickListener.onItemLongClick(getAdapterPosition(),R.id.menu_item_SendText);
+                        //getAdapterPosition();
+
+                        return true;
+                    default:
+                        return false;
+                }
+            }
 
     }
 
@@ -101,7 +139,6 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext()); //(LayoutInflater)getActivity().getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE);
         View convertView = inflater.inflate(R.layout.person_list_item, parent, false);
-        // View convertView = inflater.inflate(R.layout., parent, false);
         Person_Adapter.ViewHolder holder = new Person_Adapter.ViewHolder(convertView);
         return holder;
     }
@@ -118,6 +155,7 @@ public  class Person_Adapter extends RecyclerView.Adapter<Person_Adapter.ViewHol
             //.execute("http://api.aoprofit.com/img/photo/1.jpg");
             loadBitmap(_context,m.getSmallPhoto().toString(),holder.mIcon);
         }
+
     }
 
     @Override

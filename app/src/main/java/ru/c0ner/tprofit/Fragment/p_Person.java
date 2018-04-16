@@ -2,10 +2,12 @@ package ru.c0ner.tprofit.Fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -223,16 +225,44 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
     }
 
 
-    public void onItemLongClick(View v, int position) {
+    public void onItemLongClick(int position,int menuitem) {
 
-        //Person m = (Person) mItemList.get(position);
-        Toast.makeText(getContext(), "Долгое Нажатие на позиции  "+position, Toast.LENGTH_SHORT).show();
+        Person m = (Person) mItemList.get(position);
+        // Звонок по телефону
 
-        // Do something in response to the click
-        // dataObject m = (dataObject) parent.getAdapter().getItem(position);
-        // Toast.makeText(this.getContext(), m.getName().toString(), Toast.LENGTH_SHORT).show();
-        // str = m.getTitle().toString();
-        // mCallBack.p_Object_onItemSelect(TAG, position, m);
+
+        if (m != null) {
+            switch (menuitem) {
+                case R.id.menu_item_Call: {
+                    String tel = "tel:" + m.getPhone().toString();
+                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(tel));
+                    startActivity(intent);
+                    break;
+                }
+                case R.id.menu_item_SendText: {
+
+                    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                    sharingIntent.setType("text/plain");
+                    //sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+                    startActivity(Intent.createChooser(sharingIntent, "Отправить Сообщение "));
+                    break;
+                }
+            }
+
+
+
+            /*
+
+             */
+            // getMenuInflater().inflate(R.menu.t_profit, menu);
+            Toast.makeText(getContext(), m.getName().toString() + "  " + position, Toast.LENGTH_SHORT).show();
+
+            // Do something in response to the click
+            // dataObject m = (dataObject) parent.getAdapter().getItem(position);
+            // Toast.makeText(this.getContext(),, Toast.LENGTH_SHORT).show();
+            // str = m.getTitle().toString();
+            // mCallBack.p_Object_onItemSelect(TAG, position, m);
+        }
     }
 
 
