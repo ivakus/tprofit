@@ -15,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.util.LruCache;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -31,10 +32,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 
 import ru.c0ner.tprofit.Fragment.p_MainFragment;
 import ru.c0ner.tprofit.Fragment.p_Object;
 import ru.c0ner.tprofit.Fragment.p_Person;
+import ru.c0ner.tprofit.Fragment.t_Recognise;
 import ru.c0ner.tprofit.Fragment.webFragment;
 import ru.c0ner.tprofit.datashema.Person;
 import ru.c0ner.tprofit.datashema.dataObject;
@@ -55,11 +58,11 @@ public class t_profit extends AppCompatActivity
     final int CAMERA_ID = 0;
     final boolean FULL_SCREEN = true;
     private Uri mOutputFileUri;
-    public webFragment mWebFragment;
     public p_Object mObjectFragment;
     public FragmentManager fm;
     public p_Person mPersonFragment;
     public p_MainFragment mMainFragment;
+    public t_Recognise mRecogniseFragment;
     public LruCache<String, Bitmap> _memoryCache;
 
     public void p_Object_onItemSelect (String fagmengTAG, int position, dataObject mdataObject )
@@ -123,11 +126,12 @@ public class t_profit extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         fm = getSupportFragmentManager();
-        mWebFragment = new webFragment();
         mObjectFragment = new p_Object();
         mPersonFragment = new p_Person();
         mMainFragment = new p_MainFragment();
+        mRecogniseFragment = new t_Recognise();
         mPersonFragment.set_context(getApplicationContext());
+
         // иницилизируем кешь хранилище
         if (_memoryCache == null) {
             final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
@@ -141,20 +145,16 @@ public class t_profit extends AppCompatActivity
         };
         mPersonFragment.set_memoryCache(_memoryCache);
 
-       // fm = getSupportFragmentManager();
-/*
-        Resources resources = getResources();
-        String clientId = ""; //resources.getString(R.string.client_id);
-        String secret = ""; //resources.getString(R.string.client_secret);
-        Intent intent =WebViewActivity.createAuthActivityIntent(getApplicationContext(), clientId, secret);
-        startActivityForResult(intent, REQUEST_CODE);
-*/
-
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA},PERRMITION_RESULT);
         }
 
-       FragmentTransaction ft =  fm.beginTransaction();
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},PERRMITION_RESULT);
+        }
+
+
+        FragmentTransaction ft =  fm.beginTransaction();
        ft.add(R.id.main_frame,mMainFragment);
        ft.commit();
     }
@@ -206,9 +206,10 @@ public class t_profit extends AppCompatActivity
         switch (id)  {
             case  R.id.nav_camera : {
             // Handle the camera action
-            ft.replace(R.id.main_frame, mWebFragment);
-            ft.addToBackStack(mWebFragment.TAG);
-            break;
+                mFab.setVisibility(View.VISIBLE);
+                ft.replace(R.id.main_frame, mRecogniseFragment);
+                ft.addToBackStack(t_Recognise.TAG);
+                break;
         }
         case R.id.nav_object_fragment : {
             ft.replace(R.id.main_frame, mObjectFragment);
@@ -244,7 +245,7 @@ public class t_profit extends AppCompatActivity
         if (view_id == R.id.fab) {
             // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             //startActivityForResult(cameraIntent, CAMERA_RESULT);
-          //  saveFullImage();
+          TakePictureIntent();
         }
     }
 
@@ -254,36 +255,8 @@ public class t_profit extends AppCompatActivity
 
         if (requestCode == CAMERA_RESULT) {
             // Проверяем, содержит ли результат маленькую картинку
-            if (data != null) {
-                if (data.hasExtra("data")) {
-                    Bitmap thumbnailBitmap = data.getParcelableExtra("data");
-                    // Какие-то действия с миниатюрой
-                    mImageView.setImageBitmap(thumbnailBitmap);
-                }
-            } else {
-                // Какие-то действия с полноценным изображением,
-                // сохраненным по адресу mOutputFileUri
-                mImageView.setImageURI(mOutputFileUri);
+                mRecogniseFragment.setPic();
             }
-        }
-
-        if ( requestCode==REQUEST_CODE ) {
-            if (resultCode == AppCompatActivity.RESULT_OK) {
-                String token = data.getStringExtra(WebViewActivity.ACCESS_TOKEN);
-                Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
-                //AUTH_Token = token;
-            }
-            if (resultCode == AppCompatActivity.RESULT_CANCELED) {
-                if (data != null && data.hasExtra(WebViewActivity.AUTH_ERROR)) {
-                    String error = data.getStringExtra(WebViewActivity.AUTH_ERROR);
-                    Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        }
-
-
-
     }
 
 
@@ -295,4 +268,26 @@ public class t_profit extends AppCompatActivity
       //  intent.putExtra(MediaStore.EXTRA_OUTPUT, mOutputFileUri);
         startActivityForResult(intent, CAMERA_RESULT);
     }
+
+    private void TakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = mRecogniseFragment.createImageFile();
+                //photoFile = new File(Environment.getExternalStorageDirectory(),"test.jpg");
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,"ru.c0ner.tprofit.fileprovider",photoFile);
+               takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CAMERA_RESULT);
+            }
+        }
+    }
+
 }
