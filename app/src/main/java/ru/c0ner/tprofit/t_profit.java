@@ -43,11 +43,13 @@ import ru.c0ner.tprofit.datashema.dataObject_Status;
 public class t_profit extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack {
 
+    public final String ACCESS_TOKEN = "ACCESS_TOKEN";
     private static final int REQUEST_CODE = 100;
     FloatingActionButton mFab;
     private final int CAMERA_RESULT = 1;
     private final int PERRMITION_RESULT = 2;
     private ImageView mImageView;
+    public String TOKEN;
     public String AUTH_Token = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
     final String KEY_TOKEN = "KEY_ROKEN";
     final int CAMERA_ID = 0;
@@ -101,7 +103,8 @@ public class t_profit extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-      //  AUTH_Token = getIntent().getStringExtra(WebViewActivity.ACCESS_TOKEN);
+       TOKEN = getIntent().getStringExtra(ACCESS_TOKEN);
+
       //  if (AUTH_Token.length() <=0) {finish();}
         setContentView(R.layout.activity_t_profit);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

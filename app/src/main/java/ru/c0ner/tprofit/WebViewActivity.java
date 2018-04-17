@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -16,11 +16,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import static ru.c0ner.tprofit.R.string.callback_url;
 
@@ -67,9 +63,9 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
         onAuthStarted();
         String url = String.format(authUrlTemplate);
         URI uri = URI.create(url);
-     //   String cookie = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
-     //   CookieManager cookieManager = CookieManager.getInstance();
-     //   cookieManager.setCookie(uri.toString(),cookie);
+        //   String cookie = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
+        //   CookieManager cookieManager = CookieManager.getInstance();
+        //   cookieManager.setCookie(uri.toString(),cookie);
         webView.setWebViewClient(new OAuthWebClient(this));
         webView.loadUrl(uri.toString());
     }
@@ -81,7 +77,7 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
 
     @Override
     public void onComplete(String token) {
-        Intent intent = new Intent(this,t_profit.class);
+        Intent intent = new Intent(this, t_profit.class);
         intent.putExtra(ACCESS_TOKEN, token);
         setResult(Activity.RESULT_OK, intent);
         startActivity(intent);
@@ -90,9 +86,9 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
 
     @Override
     public void onError(String error) {
-       // Intent intent = new Intent();
-       // intent.putExtra(AUTH_ERROR, error);
-       // setResult(Activity.RESULT_CANCELED, intent);
+        // Intent intent = new Intent();
+        // intent.putExtra(AUTH_ERROR, error);
+        // setResult(Activity.RESULT_CANCELED, intent);
         Toast.makeText(this, "Вы не авторизованы", Toast.LENGTH_SHORT).show();
         finish();
     }
@@ -108,8 +104,8 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
 
-            if (url.startsWith(getString(R.string.login_soc_url)) ) {
-                Log.d("URL4:","Сераница загрузиласть вот такой URL -" + url);
+            if (url.startsWith(getString(R.string.login_soc_url))) {
+                Log.d("URL4:", "Сераница загрузиласть вот такой URL -" + url);
                 String cookies = CookieManager.getInstance().getCookie(url);
                 Log.d("URL4", "All the cookies in a string:" + cookies);
                 onComplete(cookies);
@@ -125,11 +121,11 @@ public class WebViewActivity extends AppCompatActivity implements AuthorizationL
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-           // Log.d("URL3:","Сераница загрузиласть вот такой URL -" + url);
-           // String cookies = CookieManager.getInstance().getCookie(url);
-           // Log.d("URL3", "All the cookies in a string:" + cookies);
+            // Log.d("URL3:","Сераница загрузиласть вот такой URL -" + url);
+            // String cookies = CookieManager.getInstance().getCookie(url);
+            // Log.d("URL3", "All the cookies in a string:" + cookies);
         }
     }
-
-
 }
+
+
