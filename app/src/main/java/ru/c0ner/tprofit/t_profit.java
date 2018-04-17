@@ -43,6 +43,8 @@ import ru.c0ner.tprofit.datashema.Person;
 import ru.c0ner.tprofit.datashema.dataObject;
 import ru.c0ner.tprofit.datashema.dataObject_Status;
 
+import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+
 public class t_profit extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack {
 
@@ -285,7 +287,8 @@ public class t_profit extends AppCompatActivity
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,"ru.c0ner.tprofit.fileprovider",photoFile);
                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, CAMERA_RESULT);
+               takePictureIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+               startActivityForResult(takePictureIntent, CAMERA_RESULT);
             }
         }
     }

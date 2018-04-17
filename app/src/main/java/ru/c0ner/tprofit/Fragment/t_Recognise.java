@@ -70,6 +70,7 @@ public class t_Recognise extends Fragment {
                 storageDir      /* directory */
         );
 
+
         // Save a file: path for use with ACTION_VIEW intents
         curent_photo_path = image.getAbsolutePath();
         curent_photo_name = curent_photo_path;
