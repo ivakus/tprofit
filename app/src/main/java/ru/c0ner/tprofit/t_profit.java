@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -48,6 +50,11 @@ import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 public class t_profit extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack {
 
+    private static String[] PERMISSIONS_List = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+            };
     public final String ACCESS_TOKEN = "ACCESS_TOKEN";
     private static final int REQUEST_CODE = 100;
     FloatingActionButton mFab;
@@ -152,7 +159,7 @@ public class t_profit extends AppCompatActivity
         }
 
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},PERRMITION_RESULT);
+            requestPermissions(PERMISSIONS_List,PERRMITION_RESULT);
         }
 
 
@@ -209,6 +216,7 @@ public class t_profit extends AppCompatActivity
             case  R.id.nav_camera : {
             // Handle the camera action
                 mFab.setVisibility(View.VISIBLE);
+                mRecogniseFragment.setToken(TOKEN);
                 ft.replace(R.id.main_frame, mRecogniseFragment);
                 ft.addToBackStack(t_Recognise.TAG);
                 break;
@@ -257,7 +265,10 @@ public class t_profit extends AppCompatActivity
 
         if (requestCode == CAMERA_RESULT) {
             // Проверяем, содержит ли результат маленькую картинку
+            if (resultCode == AppCompatActivity.RESULT_OK) {
                 mRecogniseFragment.setPic();
+                mRecogniseFragment.showPhoto();
+            }
             }
     }
 
@@ -287,10 +298,11 @@ public class t_profit extends AppCompatActivity
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,"ru.c0ner.tprofit.fileprovider",photoFile);
                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-               takePictureIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+               takePictureIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                startActivityForResult(takePictureIntent, CAMERA_RESULT);
             }
         }
     }
+
 
 }

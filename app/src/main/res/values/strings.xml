@@ -9,6 +9,7 @@
     <string name="str_object_api_url">http://api.aoprofit.com/api/object/</string>
     <string name="str_server_api_name">http://api.aoprofit.com</string>
     <string name="str_login_api_url">https://t.aoprofit.com/api-token-auth/</string>
+    <string name="str_recognise_api_url">https://t.aoprofit.com/api-recognise/</string>
 
     <string name="callback_url">http://example.com</string>
 
