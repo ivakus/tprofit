@@ -135,7 +135,12 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
             // Get the dimensions of the bitmap
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(curent_photo_name, bmOptions);
+           BitmapFactory.decodeFile(curent_photo_name, bmOptions);
+
+           // отладка
+          //  BitmapFactory.decodeResource(getContext().getResources(),R.drawable.ivaka, bmOptions);
+           // отладка
+
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
 
@@ -148,7 +153,11 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
             bmOptions.inPurgeable = true;
 
             curent_photo = BitmapFactory.decodeFile(curent_photo_name, bmOptions);
-         //   mImageView.setImageBitmap(curent_photo);
+            // отладка
+
+            // curent_photo = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.ivaka,bmOptions);
+
+            //   mImageView.setImageBitmap(curent_photo);
         }
     }
 
@@ -167,7 +176,6 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
         }catch(IOException ex){
             Log.e("LOG EXIF", "Failed to get Exif data", ex);
         }
-
         mImageView.setImageBitmap(curent_photo);
         img_set = true;
     }
@@ -185,7 +193,7 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
        // File f = new File()
         if (curent_photo !=null ){
             ByteArrayOutputStream oStream = new ByteArrayOutputStream();
-            curent_photo.compress(Bitmap.CompressFormat.PNG, 100, oStream);
+            curent_photo.compress(Bitmap.CompressFormat.PNG, 50, oStream);
             byte[] byteArray = oStream.toByteArray();
             encodeBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
             return  encodeBase64;
@@ -254,11 +262,17 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
          //   Gson gson = new GsonBuilder().create();
          //   String Login_request = gson.toJson(L);
 
+            String post_value = "token="+Token;
+            post_value += "img=data:image/(png|jpeg);base64,"+Bitmapbase64;
+            /*
             RequestBody body = new FormBody.Builder()//FormEncodingBuilder()
                     .add("token", Token)
                     .add("img", "data:image/(png|jpeg);base64,"+ Bitmapbase64)
                     .build();
+            */
 
+            MediaType textPlainMT = MediaType.parse("multipart/form-data");
+            RequestBody body = RequestBody.create(textPlainMT, post_value);
 
             Request request = new Request.Builder()
                     .url(url)

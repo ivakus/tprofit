@@ -253,9 +253,11 @@ public class t_profit extends AppCompatActivity
         int view_id = v.getId();
 
         if (view_id == R.id.fab) {
-            // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            //startActivityForResult(cameraIntent, CAMERA_RESULT);
+
           TakePictureIntent();
+        //  mRecogniseFragment.setPic();
+        //  mRecogniseFragment.showPhoto();
+
         }
     }
 
@@ -272,15 +274,6 @@ public class t_profit extends AppCompatActivity
             }
     }
 
-
-    private void saveFullImage() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = new File(Environment.getExternalStorageDirectory(),
-                "test.jpg");
-        mOutputFileUri = Uri.fromFile(file);
-      //  intent.putExtra(MediaStore.EXTRA_OUTPUT, mOutputFileUri);
-        startActivityForResult(intent, CAMERA_RESULT);
-    }
 
     private void TakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
