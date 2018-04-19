@@ -211,6 +211,9 @@ public class p_Person extends Fragment implements Person_Adapter.t_OnItemClickLi
     }
 
     public void getPerson() {
+        if ((mItemList != null)&&(mItemList.size()>0)) {
+            mItemList.clear();
+        }
         ServerAPI s = new ServerAPI(_context);
       //  String url = getString(R.string.str_server_api_name)+"/api/object/id/"+parent_Object.getId()+"/person";
         s.execute(API_URL);
