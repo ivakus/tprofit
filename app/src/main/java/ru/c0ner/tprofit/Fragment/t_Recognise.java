@@ -262,17 +262,17 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
          //   Gson gson = new GsonBuilder().create();
          //   String Login_request = gson.toJson(L);
 
-            String post_value = "token="+Token;
-            post_value += "img=data:image/(png|jpeg);base64,"+Bitmapbase64;
-            /*
+            //String post_value = "token="+Token;
+            //post_value += "img=data:image/(png|jpeg);base64,"+Bitmapbase64;
+
             RequestBody body = new FormBody.Builder()//FormEncodingBuilder()
                     .add("token", Token)
-                    .add("img", "data:image/(png|jpeg);base64,"+ Bitmapbase64)
+                    .add("img", Bitmapbase64)
                     .build();
-            */
 
-            MediaType textPlainMT = MediaType.parse("multipart/form-data");
-            RequestBody body = RequestBody.create(textPlainMT, post_value);
+
+          //  MediaType textPlainMT = MediaType.parse("multipart/form-data");
+          //  RequestBody body = RequestBody.create(textPlainMT, post_value);
 
             Request request = new Request.Builder()
                     .url(url)
