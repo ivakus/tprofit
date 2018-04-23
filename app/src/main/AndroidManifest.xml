@@ -15,6 +15,7 @@
 
         <activity
             android:name=".t_profit"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

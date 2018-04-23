@@ -156,8 +156,9 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
 
             // Decode the image file into a Bitmap sized to fill the View
             bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inSampleSize = 4;
             bmOptions.inPurgeable = true;
+            bmOptions.inPreferredConfig = Bitmap.Config.RGB_565;
 
             curent_photo = BitmapFactory.decodeFile(curent_photo_name, bmOptions);
             // отладка
@@ -178,6 +179,7 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
             int rotationInDegrees = exifToDegrees(rotation);
             Matrix matrix = new Matrix();
             if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
+
             curent_photo = Bitmap.createBitmap(curent_photo,0,0, curent_photo.getWidth(), curent_photo.getHeight(), matrix, true);
 
         }catch(IOException ex){
