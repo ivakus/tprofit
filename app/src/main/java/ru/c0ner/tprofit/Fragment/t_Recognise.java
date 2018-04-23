@@ -38,6 +38,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import ru.c0ner.tprofit.Adapters.DownLoadIMage;
 import ru.c0ner.tprofit.R;
 import ru.c0ner.tprofit.datashema.dataLogin;
 import ru.c0ner.tprofit.datashema.dataLoginResponse;
@@ -55,6 +56,12 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
     String Token;
     boolean img_set = false;
 
+
+    public android.support.v4.util.LruCache<String, Bitmap> _memoryCache;
+
+    public void set_memoryCache(android.support.v4.util.LruCache<String, Bitmap> _memoryCache) {
+        this._memoryCache = _memoryCache;
+    }
     public void setToken(String token) {
         Token = token;
     }
@@ -62,7 +69,7 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
     public static final String TAG = "t_RecogniseTAG";
 
     public interface t_FragmentCallBack {
-        public void onItemClick (String _TAG);
+        public void RecogniseResponse (String _TAG,dataRecogniseResponse _data);
     }
     t_FragmentCallBack mCallBack;
 
@@ -236,17 +243,19 @@ public class t_Recognise extends Fragment implements  View.OnClickListener{
                 Gson gson = new GsonBuilder().create();
                 Log.d("RECOGNISE", "onPostExecute: " + res);
                 dataRecogniseResponse recogniseResponse = gson.fromJson(res, dataRecogniseResponse.class);
-                if (recogniseResponse.getSuccess() == 1) {
-
+                if ((recogniseResponse.getSuccess() == 1) && (recogniseResponse.getIdPredict()!= null)) {
+                    mCallBack.RecogniseResponse(TAG,recogniseResponse);
                 } else {
                     //textView.setText(R.string.error_gettings_followers);
-                    Toast.makeText(getContext(), "Ошибка Формата изображения, Введенные данные не верны" + recogniseResponse.getMessage().toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Ошибка : " + recogniseResponse.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
+
             }
             //return null;
 
         }
     }
+
 
     private OkHttpClient createClient() {
         return new OkHttpClient.Builder()

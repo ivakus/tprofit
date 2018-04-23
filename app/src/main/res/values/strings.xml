@@ -10,7 +10,8 @@
     <string name="str_server_api_name">http://api.aoprofit.com</string>
     <string name="str_login_api_url">https://t.aoprofit.com/api-token-auth/</string>
     <string name="str_recognise_api_url">https://t.aoprofit.com/api-recognise/</string>
-
+    <string name="str_verifi_api_url">https://t.aoprofit.com/api-recognise-verification</string>
+    <string name="str_t_site">https://t.aoprofit.com/</string>
     <string name="callback_url">http://example.com</string>
 
     <string name="auth_url">https://t.aoprofit.com</string>

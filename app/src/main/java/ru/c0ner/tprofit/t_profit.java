@@ -40,15 +40,18 @@ import ru.c0ner.tprofit.Fragment.p_MainFragment;
 import ru.c0ner.tprofit.Fragment.p_Object;
 import ru.c0ner.tprofit.Fragment.p_Person;
 import ru.c0ner.tprofit.Fragment.t_Recognise;
+import ru.c0ner.tprofit.Fragment.t_SelectPerson;
 import ru.c0ner.tprofit.Fragment.webFragment;
 import ru.c0ner.tprofit.datashema.Person;
 import ru.c0ner.tprofit.datashema.dataObject;
 import ru.c0ner.tprofit.datashema.dataObject_Status;
+import ru.c0ner.tprofit.datashema.dataRecogniseResponse;
 
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
 public class t_profit extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener,
+        p_Object.PObjectCallBack, p_Person.PPersonCallBack,p_MainFragment.PMainFragmentCallBack, t_Recognise.t_FragmentCallBack, t_SelectPerson.t_SelectCallBack {
 
     private static String[] PERMISSIONS_List = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -62,7 +65,7 @@ public class t_profit extends AppCompatActivity
     private final int PERRMITION_RESULT = 2;
     private ImageView mImageView;
     public String TOKEN;
-    public String AUTH_Token = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
+    //public String AUTH_Token = "sessionid=wc68dqzz05xnwau07syu7tdj9m2k3zvm; csrftoken=8MK2v11Mg5h3uuEmLTRAi0jXCEsdk7e9YAY5gzkbb7rPRefaPAR75n9lXcUYwwai";
     final String KEY_TOKEN = "KEY_ROKEN";
     final int CAMERA_ID = 0;
     final boolean FULL_SCREEN = true;
@@ -72,6 +75,7 @@ public class t_profit extends AppCompatActivity
     public p_Person mPersonFragment;
     public p_MainFragment mMainFragment;
     public t_Recognise mRecogniseFragment;
+    public t_SelectPerson mSelectFragment;
     public LruCache<String, Bitmap> _memoryCache;
 
     public void p_Object_onItemSelect (String fagmengTAG, int position, dataObject mdataObject )
@@ -111,6 +115,27 @@ public class t_profit extends AppCompatActivity
         }
     }
 
+    public void RecogniseResponse (String _TAG,dataRecogniseResponse _data){
+        //Toast.makeText(this, _data.getUrl().toString(), Toast.LENGTH_LONG).show();
+        mSelectFragment.setTOKEN(TOKEN);
+        mFab.setVisibility(View.INVISIBLE);
+        mSelectFragment.setRecogniseResponse(_data);
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.main_frame, mSelectFragment);
+       // ft.addToBackStack(p_Person.TAG);
+        ft.commit();
+        }
+
+
+    public void  OnReturn (String TAG){
+        FragmentTransaction ft= fm.beginTransaction();
+        mFab.setVisibility(View.VISIBLE);
+        mRecogniseFragment.setToken(TOKEN);
+        ft.replace(R.id.main_frame, mRecogniseFragment);
+       // ft.addToBackStack(t_Recognise.TAG);
+        ft.commit();
+
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +164,7 @@ public class t_profit extends AppCompatActivity
         mPersonFragment = new p_Person();
         mMainFragment = new p_MainFragment();
         mRecogniseFragment = new t_Recognise();
+        mSelectFragment = new t_SelectPerson();
         mPersonFragment.set_context(getApplicationContext());
 
         // иницилизируем кешь хранилище
@@ -153,6 +179,8 @@ public class t_profit extends AppCompatActivity
             };
         };
         mPersonFragment.set_memoryCache(_memoryCache);
+        mRecogniseFragment.set_memoryCache(_memoryCache);
+        mSelectFragment.set_memoryCache(_memoryCache);
 
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA},PERRMITION_RESULT);
